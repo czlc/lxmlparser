@@ -4,6 +4,6 @@
     <ClInclude Include="common.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="xmlparse.cpp" />
+    <ClCompile Include="xmlparser.cpp" />
   </ItemGroup>
 </Project>
