@@ -14,68 +14,50 @@ extern "C"
 
 using namespace rapidxml;
 
-// node
-static void ParseNode(lua_State *L, xml_node<>* pNode)
-{
+static void ParseNode(lua_State *L, xml_node<>* pNode) {
+	lua_checkstack(L, 8);
+
+	lua_pushstring(L, pNode->name());
+	lua_rawget(L, -2);
+	if (lua_type(L, -1) == LUA_TNIL) {
+		lua_pop(L, 1);
+		lua_newtable(L);
+		lua_pushvalue(L, -1);
+		lua_setfield(L, -3, pNode->name());
+	}
+	if (lua_type(L, -1) != LUA_TTABLE) {
+		luaL_error(L, "do not support *attr* and *child* has same name: %s", pNode->name());
+	}
+
+	lua_newtable(L);
+	lua_pushvalue(L, -1);
+	lua_rawseti(L, -3, lua_rawlen(L, -3) + 1);
+
 	xml_attribute<> *pAttribute = pNode->first_attribute();
-	lua_newtable(L);	// node nt
-	lua_pushvalue(L, -1);	// node nt, nt
-	lua_setfield(L, -3, "attribute"); // node, node.attribute
-	while (pAttribute)
-	{
-		lua_pushstring(L, pAttribute->value()); // node, node.attribute, value
-		lua_setfield(L, -2, pAttribute->name());	// node, node.attribute
+	while (pAttribute) {
+		lua_pushstring(L, pAttribute->value());
+		lua_setfield(L, -2, pAttribute->name());
 		pAttribute = pAttribute->next_attribute();
 	}
-	lua_pop(L, 1);	// node
 
 	xml_node<> *pChildNode = pNode->first_node();
-	lua_newtable(L);	// node, nt
-	lua_pushvalue(L, -1);	// node, nt, nt
-	lua_setfield(L, -3, "children"); // node, node.children
-	while (pChildNode)
-	{
-		lua_pushstring(L, pChildNode->name());	// node, node.children, name
-		lua_rawget(L, -2);	// node, node.children, node.children[name]
-		if (lua_type(L, -1) == LUA_TNIL) {
-			lua_pop(L, 1);	// node, node.children
-			lua_newtable(L);	// node, node.children, nt
-			lua_pushvalue(L, -1);	// node, node.children, nt, nt
-			lua_setfield(L, -3, pChildNode->name()); // node, node.children, node.children[name]
-		}
-
-		lua_newtable(L);	// node, node.children, node.children[name], nt
-		lua_pushvalue(L, -1);	// node, node.children, node.children[name], nt, nt
-		lua_rawseti(L, -3, lua_rawlen(L, -3) + 1);	// node, node.children, node.children[name], node.children[name][n]
+	while (pChildNode) {
 		ParseNode(L, pChildNode);
-		lua_pop(L, 2);	// node, node.children
 		pChildNode = pChildNode->next_sibling();
 	}
-	lua_pop(L, 1);	// node
+
+	lua_pop(L, 2);
 }
 
 static void ParseData(lua_State *L, char *pFileData) {
 	xml_document<> XmlDoc;
 
-	lua_newtable(L);	// root
+	lua_newtable(L);
+
 	XmlDoc.parse<0>(pFileData);
 	xml_node<> *pRootNode = XmlDoc.first_node();
-	while (pRootNode)
-	{
-		lua_pushstring(L, pRootNode->name());	// root, node_name
-		lua_rawget(L, -2);	// root, root[node_name]
-		if (lua_type(L, -1) == LUA_TNIL) {
-			lua_pop(L, 1);	// root
-			lua_newtable(L);	// root, nt
-			lua_pushvalue(L, -1); // root, nt, nt
-			lua_setfield(L, -3, pRootNode->name());	// root, root[node_name]
-		}
-
-		lua_newtable(L);	// root, root[node_name], nt
-		lua_pushvalue(L, -1);	// root, root[node_name], nt, nt
-		lua_rawseti(L, -3, lua_rawlen(L, -3) + 1);	// root, root[node_name], root[node_name][n]
+	while (pRootNode) {
 		ParseNode(L, pRootNode);
-		lua_pop(L, 2);	// root
 		pRootNode = pRootNode->next_sibling();
 	}
 }
