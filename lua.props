@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <LUA_INC_DIR>D:\sourcecode\github\czlc\lua\lua-5.4.0\src</LUA_INC_DIR>
+    <LUA_LIB_DIR>D:\sourcecode\github\czlc\lua\lua-5.4.0\product</LUA_LIB_DIR>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <BuildMacro Include="LUA_INC_DIR">
+      <Value>$(LUA_INC_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LUA_LIB_DIR">
+      <Value>$(LUA_LIB_DIR)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
