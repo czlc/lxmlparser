@@ -99,8 +99,8 @@ static int ParseXmlData(lua_State *L) {
 extern "C" LUAMOD_API int luaopen_lxml(lua_State *L) {
 	luaL_checkversion(L);
 	luaL_Reg l[] = {
-		{"parse_file", ParseXmlFile},
-		{"parse_data", ParseXmlData},
+		{"read", ParseXmlFile},
+		{"parse", ParseXmlData},
 
 		{NULL, NULL},
 	};
