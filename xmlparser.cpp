@@ -39,6 +39,14 @@ static void ParseNode(lua_State *L, xml_node<>* pNode) {
 		lua_setfield(L, -2, pAttribute->name());
 		pAttribute = pAttribute->next_attribute();
 	}
+	if (pNode->value()) {
+		if (lua_getfield(L, -1, "__value") != LUA_TNIL)
+			luaL_error(L, "node value use attr __value, confilic!");
+		lua_pop(L, 1);
+
+		lua_pushstring(L, pNode->value());
+		lua_setfield(L, -2, "__value");
+	}
 
 	xml_node<> *pChildNode = pNode->first_node();
 	while (pChildNode) {
@@ -53,8 +61,7 @@ static void ParseData(lua_State *L, char *pFileData) {
 	xml_document<> XmlDoc;
 
 	lua_newtable(L);
-
-	XmlDoc.parse<0>(pFileData);
+	XmlDoc.parse<parse_no_data_nodes>(pFileData);
 	xml_node<> *pRootNode = XmlDoc.first_node();
 	while (pRootNode) {
 		ParseNode(L, pRootNode);
